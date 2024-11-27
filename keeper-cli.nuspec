@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>keeper-cli</id>
+    <version>1.1.5</version>
+    <packageSourceUrl>https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli</packageSourceUrl>
+    <owners>rudesome</owners>
+    <title>Keeper Secrets Manager CLI</title>
+    <authors>Keeper Security</authors>
+    <projectUrl>https://github.com/Keeper-Security/secrets-manager</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/Keeper-Security/secrets-manager/refs/heads/master/integration/keeper_secrets_manager_azure_pipeline_extension/images/ksm-logo-128x128.png</iconUrl>
+    <licenseUrl>https://raw.githubusercontent.com/Keeper-Security/secrets-manager/refs/heads/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/Keeper-Security/secrets-manager</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/Keeper-Security/secrets-manager/issues</bugTrackerUrl>
+    <tags>password-manager keepersecurity secrets python devops</tags>
+    <summary>The Keeper Secrets Manager CLI provides core Secrets Manager Vault interaction from a terminal, shell script or any software that can be launched from a shell.</summary>
+    <description>
+      - Get Secrets from the Keeper Vault
+      - Update Secrets from the Keeper Vault
+      - Integrate with 3rd party CI/CD and other dev tools
+      - Sync secrets between Keeper and external secrets providers
+      - Replace environment variables with Keeper secrets in scripts and containers
+    </description>
+    <releaseNotes>
+
+    Release notes found here: https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli#115
+
+    </releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
