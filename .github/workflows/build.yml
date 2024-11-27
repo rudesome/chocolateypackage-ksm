@@ -131,7 +131,7 @@ jobs:
         args: pack
 
     - name: Rename file
-      run: mv keeper-secrets-manager-cli-windows*.nupkg keeper-cli.nupkg
+      run: mv keeper-cli*.nupkg keeper-cli.nupkg
 
     - name: Choco add API key
       uses: crazy-max/ghaction-chocolatey@v3.0.0
