@@ -1,0 +1,146 @@
+name: Package Keeper KSM
+
+concurrency: ci-build
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - ".github/**"
+  schedule:
+    - cron:  '00 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  update_version:
+    name: Update version
+    runs-on: ubuntu-latest
+    outputs:
+      updated: ${{ steps.check-if-update.outputs.updated }}
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+    - name: Get latest version
+      run: |
+        VER=$(curl https://api.github.com/repos/Keeper-Security/secrets-manager/releases | jq -r '.[] | select(.tag_name | startswith("ksm")) | .tag_name' | sort -V | tail -n 1)
+        echo "version=${VER##*-}" >> $GITHUB_ENV
+        echo "release=$(echo "$VER" | cut -d'-' -f3 | tr -d '.')" >> $GITHUB_ENV
+
+    - name: Check if version is updated
+      id: check-if-update
+      run: |
+        if [ "$(cat ./VERSION)" != ${{ env.version }} ]; then
+          echo "version has been changed"
+          echo "updated=true" >> $GITHUB_OUTPUT
+        else
+          echo "version has not been changed"
+          echo "updated=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Get file hash
+      run: |
+        wget --no verbose https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe
+        HASH=$(sha256sum keeper-secrets-manager-cli-windows-${{ env.version }}.exe | awk "{print \$1}")
+        echo "hash=$HASH" >> $GITHUB_ENV
+
+    - name: Make install script
+      run: |
+        cat <<EOF > tools/chocolateyinstall.ps1
+        \$ErrorActionPreference = 'Stop';
+        \$params = @{
+          packageName    = 'keeper_cli'
+          FileType       = 'exe'
+          SilentArgs     = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /FORCECLOSEAPPLICATION'
+          Url64bit       = 'https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe'
+          checksum64     = '${{ env.hash }}' 
+          checksumType64 = 'sha256'
+        }
+        Install-ChocolateyPackage @params
+        EOF
+
+    - name: Make nuspec
+      run: |
+        cat << EOF > keeper-cli.nuspec
+        <?xml version="1.0" encoding="utf-8"?>
+        <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+          <metadata>
+            <id>keeper-cli</id>
+            <version>${{ env.version }}</version>
+            <packageSourceUrl>https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli</packageSourceUrl>
+            <owners>rudesome</owners>
+            <title>Keeper Secrets Manager CLI</title>
+            <authors>Keeper Security</authors>
+            <projectUrl>https://github.com/Keeper-Security/secrets-manager</projectUrl>
+            <iconUrl>https://raw.githubusercontent.com/Keeper-Security/secrets-manager/refs/heads/master/integration/keeper_secrets_manager_azure_pipeline_extension/images/ksm-logo-128x128.png</iconUrl>
+            <licenseUrl>https://raw.githubusercontent.com/Keeper-Security/secrets-manager/refs/heads/master/LICENSE</licenseUrl>
+            <requireLicenseAcceptance>true</requireLicenseAcceptance>
+            <projectSourceUrl>https://github.com/Keeper-Security/secrets-manager</projectSourceUrl>
+            <bugTrackerUrl>https://github.com/Keeper-Security/secrets-manager/issues</bugTrackerUrl>
+            <tags>password-manager keepersecurity secrets python devops</tags>
+            <summary>The Keeper Secrets Manager CLI provides core Secrets Manager Vault interaction from a terminal, shell script or any software that can be launched from a shell.</summary>
+            <description>
+              - Get Secrets from the Keeper Vault
+              - Update Secrets from the Keeper Vault
+              - Integrate with 3rd party CI/CD and other dev tools
+              - Sync secrets between Keeper and external secrets providers
+              - Replace environment variables with Keeper secrets in scripts and containers
+            </description>
+            <releaseNotes>
+
+            Release notes found here: https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli#${{ env.release }}
+
+            </releaseNotes>
+          </metadata>
+          <files>
+            <file src="tools\**" target="tools" />
+          </files>
+        </package>
+        EOF
+
+    - name: Remove EXE
+      run: rm keeper-secrets-manager-cli-windows*.exe
+
+    - name: Write latest version to file
+      run: echo -n ${{ env.version }} > VERSION
+
+    - name: Commit and push changes
+      id: push
+      uses: devops-infra/action-commit-push@v0.9.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        commit_message: "update(version): ${{ env.version }}"
+
+  build:
+    name: Chocolatey Build
+    runs-on: windows-latest
+    timeout-minutes: 15
+    needs: update_version
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 
+      with:
+        ref: master
+
+    - name: Choco Package
+      uses: crazy-max/ghaction-chocolatey@v3.0.0
+      with:
+        args: pack
+
+    - name: Rename file
+      run: mv keeper-secrets-manager-cli-windows*.nupkg keeper-cli.nupkg
+
+    - name: Choco add API key
+      uses: crazy-max/ghaction-chocolatey@v3.0.0
+      if: needs.update_version.outputs.updated == 'true'
+      with:
+        args: apikey -y -k ${{ secrets.CHOCO_TOKEN }} --source https://push.chocolatey.org/
+
+    - name: Push to Chocolatey
+      uses: crazy-max/ghaction-chocolatey@v3.0.0
+      if: needs.update_version.outputs.updated == 'true'
+      with:
+        args: push keeper-secrets-manager-cli.nupkg -s https://push.chocolatey.org/
