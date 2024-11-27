@@ -26,10 +26,9 @@ jobs:
 
     - name: Get latest version
       run: |
-        TAG_NAME=$(curl https://api.github.com/repos/Keeper-Security/secrets-manager/releases/latest | jq '.["tag_name"]' | tr -d \")
-        VER=${TAG_NAME##*/}
-        echo "version=$VER" >> $GITHUB_ENV
-        echo "semver=${VER:1}" >> $GITHUB_ENV
+        VER=$(curl https://api.github.com/repos/Keeper-Security/secrets-manager/releases | jq -r '.[] | select(.tag_name | startswith("ksm")) | .tag_name' | sort -V | tail -n 1)
+        echo "version=${VER##*-}" >> $GITHUB_ENV
+        echo "release=$(echo "$VER" | cut -d'-' -f3 | tr -d '.')" >> $GITHUB_ENV
 
     - name: Check if version is updated
       id: check-if-update
@@ -44,8 +43,8 @@ jobs:
 
     - name: Get file hash
       run: |
-        wget --no-verbose https://github.com/Keeper-Security/secrets-manager/releases/download/${{ env.version }}/standalone-glazewm-${{ env.version }}-x64.msi
-        HASH=$(sha256sum standalone-glazewm-${{ env.version }}-x64.msi | awk "{print \$1}")
+        wget --no verbose https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe
+        HASH=$(sha256sum keeper-secrets-manager-cli-windows-${{ env.version }}.exe | awk "{print \$1}")
         echo "hash=$HASH" >> $GITHUB_ENV
 
     - name: Make install script
@@ -53,10 +52,10 @@ jobs:
         cat <<EOF > tools/chocolateyinstall.ps1
         \$ErrorActionPreference = 'Stop';
         \$params = @{
-          packageName    = 'glazewm'
-          FileType       = 'msi'
-          SilentArgs     = '/qn /norestart'
-          Url64bit       = 'https://github.com/glzr-io/glazewm/releases/download/${{ env.version }}/standalone-glazewm-${{ env.version }}-x64.msi'
+          packageName    = 'keeper_cli'
+          FileType       = 'exe'
+          SilentArgs     = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /FORCECLOSEAPPLICATION'
+          Url64bit       = 'https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe'
           checksum64     = '${{ env.hash }}' 
           checksumType64 = 'sha256'
         }
@@ -65,33 +64,34 @@ jobs:
 
     - name: Make nuspec
       run: |
-        cat << EOF > glazewm.nuspec
+        cat << EOF > keeper-cli.nuspec
         <?xml version="1.0" encoding="utf-8"?>
         <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
           <metadata>
-            <id>glazewm</id>
-            <version>${{ env.semver }}</version>
-            <packageSourceUrl>https://github.com/rudesome/chocolateypackage-glazewm</packageSourceUrl>
+            <id>keeper-cli</id>
+            <version>${{ env.version }}</version>
+            <packageSourceUrl>https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli</packageSourceUrl>
             <owners>rudesome</owners>
-            <title>GlazeWM</title>
-            <authors>glzr.io</authors>
-            <projectUrl>https://github.com/glzr-io/glazewm</projectUrl>
-            <iconUrl>https://raw.githubusercontent.com/glzr-io/glazewm/main/resources/assets/logo.svg</iconUrl>
-            <licenseUrl>https://raw.githubusercontent.com/glzr-io/glazewm/main/LICENSE.md</licenseUrl>
+            <title>Keeper Secrets Manager CLI</title>
+            <authors>Keeper Security</authors>
+            <projectUrl>https://github.com/Keeper-Security/secrets-manager</projectUrl>
+            <iconUrl>https://raw.githubusercontent.com/Keeper-Security/secrets-manager/refs/heads/master/integration/keeper_secrets_manager_azure_pipeline_extension/images/ksm-logo-128x128.png</iconUrl>
+            <licenseUrl>https://raw.githubusercontent.com/Keeper-Security/secrets-manager/refs/heads/master/LICENSE</licenseUrl>
             <requireLicenseAcceptance>true</requireLicenseAcceptance>
-            <projectSourceUrl>https://github.com/glzr-io/glazewm</projectSourceUrl>
-            <bugTrackerUrl>https://github.com/glzr-io/glazewm/issues</bugTrackerUrl>
-            <tags>rust window-manager tiling-window-manager i3wm</tags>
-            <summary>GlazeWM is a tiling window manager for Windows inspired by i3wm.</summary>
+            <projectSourceUrl>https://github.com/Keeper-Security/secrets-manager</projectSourceUrl>
+            <bugTrackerUrl>https://github.com/Keeper-Security/secrets-manager/issues</bugTrackerUrl>
+            <tags>password-manager keepersecurity secrets python devops</tags>
+            <summary>The Keeper Secrets Manager CLI provides core Secrets Manager Vault interaction from a terminal, shell script or any software that can be launched from a shell.</summary>
             <description>
-              GlazeWM lets you easily organize windows and adjust their layout on the fly by using keyboard-driven commands.
-
-              This package uses the standalone MSI.
-              The Zebar integration has its own chocolatey package: https://community.chocolatey.org/packages/zebar
+              - Get Secrets from the Keeper Vault
+              - Update Secrets from the Keeper Vault
+              - Integrate with 3rd party CI/CD and other dev tools
+              - Sync secrets between Keeper and external secrets providers
+              - Replace environment variables with Keeper secrets in scripts and containers
             </description>
             <releaseNotes>
 
-            Release notes found here: https://github.com/glzr-io/glazewm/releases/tag/${{ env.version }}
+            Release notes found here: https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli#${{ env.release }}
 
             </releaseNotes>
           </metadata>
@@ -101,8 +101,8 @@ jobs:
         </package>
         EOF
 
-    - name: Remove MSI
-      run: rm standalone-glazewm*.msi
+    - name: Remove EXE
+      run: rm keeper-secrets-manager-cli-windows*.exe
 
     - name: Write latest version to file
       run: echo -n ${{ env.version }} > VERSION
@@ -125,13 +125,13 @@ jobs:
       with:
         ref: master
 
-    - name: Choco Package 
+    - name: Choco Package
       uses: crazy-max/ghaction-chocolatey@v3.0.0
       with:
-        args: pack 
+        args: pack
 
     - name: Rename file
-      run: mv glazewm*.nupkg glazewm.nupkg
+      run: mv keeper-secrets-manager-cli-windows*.nupkg keeper-cli.nupkg
 
     - name: Choco add API key
       uses: crazy-max/ghaction-chocolatey@v3.0.0
@@ -143,4 +143,4 @@ jobs:
       uses: crazy-max/ghaction-chocolatey@v3.0.0
       if: needs.update_version.outputs.updated == 'true'
       with:
-        args: push glazewm.nupkg -s https://push.chocolatey.org/
+        args: push keeper-secrets-manager-cli.nupkg -s https://push.chocolatey.org/
