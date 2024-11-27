@@ -43,7 +43,7 @@ jobs:
 
     - name: Get file hash
       run: |
-        wget --no verbose https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe
+        wget --no-verbose https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe
         HASH=$(sha256sum keeper-secrets-manager-cli-windows-${{ env.version }}.exe | awk "{print \$1}")
         echo "hash=$HASH" >> $GITHUB_ENV
 
