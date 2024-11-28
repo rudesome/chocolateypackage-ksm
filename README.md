@@ -1,17 +1,18 @@
-# GlazeWM - Chocolatey Package
-GlazeWM is a tiling window manager for Windows inspired by i3wm.
+[![Package Keeper KSM](https://github.com/rudesome/chocolateypackage-ksm/actions/workflows/build.yml/badge.svg)](https://github.com/rudesome/chocolateypackage-ksm/actions/workflows/build.yml)
+
+# Keeper CLI - Chocolatey Package
+The Keeper Secrets Manager CLI ("KSM CLI") provides core Secrets Manager Vault interaction from a terminal, shell script or any software that can be launched from a shell.
 
 ---
 
 ## Package
 
-This package contains the **standalone** MSI installer of GlazeWM <br>
-Zebar integration has its own [Chocolatey Package](https://community.chocolatey.org/packages/zebar)
+This package contains the EXE installer of Keeper Secrets Manager CLI <br>
 
 ---
 
 ## Credits
 
-- [glzr.io](https://github.com/glzr-io)
+- [Keeper-Security](https://github.com/Keeper-Security)
 
 ---
