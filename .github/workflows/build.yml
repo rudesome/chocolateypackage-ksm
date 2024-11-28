@@ -83,11 +83,11 @@ jobs:
             <tags>password-manager keepersecurity secrets python devops</tags>
             <summary>The Keeper Secrets Manager CLI provides core Secrets Manager Vault interaction from a terminal, shell script or any software that can be launched from a shell.</summary>
             <description>
-              - Get Secrets from the Keeper Vault
-              - Update Secrets from the Keeper Vault
-              - Integrate with 3rd party CI/CD and other dev tools
-              - Sync secrets between Keeper and external secrets providers
-              - Replace environment variables with Keeper secrets in scripts and containers
+                - Get Secrets from the Keeper Vault
+                - Update Secrets from the Keeper Vault
+                - Integrate with 3rd party CI/CD and other dev tools
+                - Sync secrets between Keeper and external secrets providers
+                - Replace environment variables with Keeper secrets in scripts and containers
             </description>
             <releaseNotes>
 
