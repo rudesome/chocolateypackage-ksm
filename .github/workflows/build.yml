@@ -83,11 +83,18 @@ jobs:
             <tags>password-manager keepersecurity secrets python devops</tags>
             <summary>The Keeper Secrets Manager CLI provides core Secrets Manager Vault interaction from a terminal, shell script or any software that can be launched from a shell.</summary>
             <description>
+
+              Keeper Secrets Manager is a component of the Keeper Enterprise platform.
+              It provides your DevOps, IT Security and software development teams with a fully cloud-based, Zero-Knowledge platform
+              for managing all of your infrastructure secrets such as API keys, Database passwords, access keys, certificates and any type of confidential data.
+
+              Common use cases for Secrets Manager include:
                 - Get Secrets from the Keeper Vault
                 - Update Secrets from the Keeper Vault
                 - Integrate with 3rd party CI/CD and other dev tools
                 - Sync secrets between Keeper and external secrets providers
                 - Replace environment variables with Keeper secrets in scripts and containers
+
             </description>
             <releaseNotes>
 
