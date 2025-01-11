@@ -13,7 +13,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <projectSourceUrl>https://github.com/Keeper-Security/secrets-manager</projectSourceUrl>
     <bugTrackerUrl>https://github.com/Keeper-Security/secrets-manager/issues</bugTrackerUrl>
-    <tags>password-manager keepersecurity secrets python devops</tags>
+    <tags>keeper password-manager keepersecurity secrets python devops</tags>
     <summary>The Keeper Secrets Manager CLI provides core Secrets Manager Vault interaction from a terminal, shell script or any software that can be launched from a shell.</summary>
     <description>
 
