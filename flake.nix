@@ -2,7 +2,7 @@
   description = "Chocolatey package of KSM (Keeper)";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
   };
 
   outputs = { self, home-manager, nixpkgs, flake-parts }@inputs:
