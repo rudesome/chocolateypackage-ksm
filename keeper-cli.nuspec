@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>keeper-cli</id>
-    <version>1.1.7</version>
+    <version>1.2.0</version>
     <packageSourceUrl>https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli</packageSourceUrl>
     <owners>rudesome</owners>
     <title>Keeper Secrets Manager CLI</title>
@@ -31,7 +31,7 @@
     </description>
     <releaseNotes>
 
-    Release notes found here: https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli#117
+    Release notes found here: https://github.com/Keeper-Security/secrets-manager/tree/master/integration/keeper_secrets_manager_cli#120
 
     </releaseNotes>
   </metadata>
