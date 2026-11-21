@@ -3,8 +3,8 @@ $params = @{
   packageName    = 'keeper_cli'
   FileType       = 'exe'
   SilentArgs     = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /FORCECLOSEAPPLICATION'
-  Url64bit       = 'https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-1.4.0/keeper-secrets-manager-cli-windows-1.4.0.exe'
-  checksum64     = 'a407cca5c828257a5970d445d0bd01fa69ae99093f18a56ff79cb659d502b048' 
+  Url64bit       = 'https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-v1.5.0/keeper-secrets-manager-cli-windows-1.5.0.exe'
+  checksum64     = '8e972c38cef473c3bdc997a7271c6a2451b008bdb15d71fc1802e674905a33a7' 
   checksumType64 = 'sha256'
 }
 Install-ChocolateyPackage @params
