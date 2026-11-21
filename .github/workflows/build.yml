@@ -26,9 +26,13 @@ jobs:
 
     - name: Get latest version
       run: |
-        VER=$(curl https://api.github.com/repos/Keeper-Security/secrets-manager/releases | jq -r '.[] | select(.tag_name | startswith("ksm")) | .tag_name' | sort -V | tail -n 1)
-        echo "version=${VER##*-}" >> $GITHUB_ENV
-        echo "release=$(echo "$VER" | cut -d'-' -f3 | tr -d '.')" >> $GITHUB_ENV
+        # tags are "ksm-cli-1.4.0" or "ksm-cli-v1.5.0"; sort on the bare version so both formats compare correctly
+        TAG=$(curl -sf "https://api.github.com/repos/Keeper-Security/secrets-manager/releases?per_page=100" | jq -r '.[] | select(.tag_name | startswith("ksm-cli-")) | .tag_name' | sed -E 's/^ksm-cli-v?(.*)$/\1 &/' | sort -V | tail -n 1 | cut -d' ' -f2)
+        VER=${TAG#ksm-cli-}
+        VER=${VER#v}
+        echo "tag=$TAG" >> $GITHUB_ENV
+        echo "version=$VER" >> $GITHUB_ENV
+        echo "release=${VER//./}" >> $GITHUB_ENV
 
     - name: Check if version is updated
       id: check-if-update
@@ -43,7 +47,7 @@ jobs:
 
     - name: Get file hash
       run: |
-        wget --no-verbose https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe
+        wget --no-verbose https://github.com/Keeper-Security/secrets-manager/releases/download/${{ env.tag }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe
         HASH=$(sha256sum keeper-secrets-manager-cli-windows-${{ env.version }}.exe | awk "{print \$1}")
         echo "hash=$HASH" >> $GITHUB_ENV
 
@@ -55,7 +59,7 @@ jobs:
           packageName    = 'keeper_cli'
           FileType       = 'exe'
           SilentArgs     = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /FORCECLOSEAPPLICATION'
-          Url64bit       = 'https://github.com/Keeper-Security/secrets-manager/releases/download/ksm-cli-${{ env.version }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe'
+          Url64bit       = 'https://github.com/Keeper-Security/secrets-manager/releases/download/${{ env.tag }}/keeper-secrets-manager-cli-windows-${{ env.version }}.exe'
           checksum64     = '${{ env.hash }}' 
           checksumType64 = 'sha256'
         }
